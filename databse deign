@@ -1,0 +1,129 @@
+PRAGMA foreign_keys = ON;
+
+
+
+DROP TABLE IF EXISTS seller_review;
+DROP TABLE IF EXISTS product_review;
+DROP TABLE IF EXISTS rating;
+DROP TABLE IF EXISTS questions;
+DROP TABLE IF EXISTS shopper_answer;
+DROP TABLE IF EXISTS seller_answer;
+
+CREATe TABLE rating
+(
+rating_id INTEGER PRIMARY KEY AUTOINCREMENT,
+rating_name TEXT UNIQUE ,
+stars TEXT   UNIQUE
+CONSTRAINT rating_name_check CHECK (rating_name IN ('poor','fair','good','very good','excellent')),
+CONSTRAINT stars_check CHECK ( stars IN ('*','**','***','****','*****'))
+
+);
+
+
+CREATE TABLE seller_review
+(
+shopper_id INTEGER,
+seller_id INTEGER,
+comment TEXT,
+s_review_data TEXT not null default (strftime('%Y-%m-%d','now')), 
+rating_id integer,
+PRIMARY KEY (shopper_id, seller_id),
+CONSTRAINT seller_id_fk FOREIGN KEY (seller_id) REFERENCES sellers(seller_id),
+CONSTRAINT shopper_id_fk FOREIGN KEY (shopper_id) REFERENCES shoppers(shopper_id),
+CONSTRAINT  rating_seller_fk FOREIGN KEY (rating_id) REFERENCES rating(rating_id)
+);
+
+CREATE TABLE product_review
+(
+shopper_id INTEGER NOT NULL,
+product_id INTEGER NOT NULL,
+comment TEXT,
+p_review_data TEXT not null default (strftime('%Y-%m-%d','now')), 
+rating_id integer,
+PRIMARY KEY (shopper_id, product_id),
+CONSTRAINT product_id_fk FOREIGN KEY (product_id) REFERENCES products(product_id),
+CONSTRAINT shopper_id_fk FOREIGN KEY (shopper_id) REFERENCES shoppers(shopper_id),
+CONSTRAINT  rating_product_fk FOREIGN KEY (rating_id) REFERENCES rating(rating_id)
+);
+
+
+CREATE TABLE questions
+(
+question_id INTEGER PRIMARY KEY AUTOINCREMENT,
+shopper_id INTEGER NOT NULL,
+product_id INTEGERT NOT NULL,
+question TEXT NOT NULL,
+question_date TEXT not null default (strftime('%Y-%m-%d','now')),
+
+CONSTRAINT shopper_question_fk FOREIGN KEY (shopper_id) REFERENCES shoppers(shopper_id),
+CONSTRAINT product_question_fk FOREIGN KEY (product_id) REFERENCES products(product_id)
+);
+
+CREATE TABLE shopper_answer
+(
+shopper_answer_id INTEGER PRIMARY KEY AUTOINCREMENT,
+question_id INTEGER,
+shopper_id INTEGER,
+answer TEXT,
+shopper_answer_data TEXT not null default (strftime('%Y-%m-%d','now')),
+CONSTRAINT question_fk1 FOREIGN KEY (question_id) REFERENCES question(question_id),
+CONSTRAINT shopper_answer_fk FOREIGN KEY (shopper_id) REFERENCES shoppers(shopper_id)
+);
+
+CREATE TABLE seller_answer
+(
+seller_answer_id INTEGER PRIMARY KEY AUTOINCREMENT,
+question_id INTEGER ,
+seller_id INTEGER,
+answer TEXT,
+answer_data TEXT
+seller_id INTEGER,
+seller_answer_data TEXT not null default (strftime('%Y-%m-%d','now')),
+
+CONSTRAINT question_fk2 FOREIGN KEY (question_id) REFERENCES question(question_id),
+CONSTRAINT seller_answer_fk FOREIGN KEY (seller_id) REFERENCES sellers(seller_id)
+);
+
+INSERT INTO rating (rating_name, stars)
+VALUES ( "poor", "*");
+INSERT INTO rating (rating_name, stars)
+VALUES ( "fair", "**");
+INSERT INTO rating (rating_name, stars)
+VALUES ( "good", "***");
+INSERT INTO rating (rating_name, stars)
+VALUES ( "very good", "****");
+INSERT INTO rating (rating_name, stars)
+VALUES ( "excellent", "*****");
+
+INSERT INTO seller_review (shopper_Id, seller_id, comment, rating_id)
+VALUES ( 10001 , 200001, "Fast response and gave a full refund", 5);
+INSERT INTO seller_review (shopper_Id, seller_id, comment, rating_id)
+VALUES ( 10001 , 200005, "He has good offers", 4);
+INSERT INTO seller_review (shopper_Id, seller_id, comment, rating_id)
+VALUES ( 10020 , 200010, "He didn't offer a refund", 2);
+INSERT INTO seller_review (shopper_Id, seller_id,comment, rating_id)
+VALUES ( 10014 , 200009,"Can improve his offers", 3);
+INSERT INTO seller_review (shopper_Id, seller_id, comment, rating_id)
+VALUES ( 10023 , 200011, "Did not respond to my messages", 1);
+
+INSERT INTO product_review (shopper_Id, product_id, comment, rating_id)
+VALUES ( 10001 , 3000021, "Fast delivery, poduct like photos", 5);
+INSERT INTO product_review (shopper_Id, product_id, comment, rating_id)
+VALUES ( 10001 , 3007676, "Good value for the price", 4);
+INSERT INTO product_review (shopper_Id, product_id, comment, rating_id)
+VALUES ( 10020 , 3007786, "bad value for the price", 2);
+INSERT INTO product_review (shopper_Id, product_id,comment, rating_id)
+VALUES ( 10014 , 3007905, "I wish they improve the product quality even if they have to raise the price", 3);
+INSERT INTO product_review (shopper_Id, product_id, comment, rating_id)
+VALUES ( 10023 , 3007937, "bad quality, not like pictures", 1);
+
+INSERT INTO questions (shopper_id, product_id, question)
+VALUES (10004, 3000021, "What about the TV sound quality");
+INSERT INTO questions (shopper_id, product_id, question)
+VALUES (10004, 3000021, "How much id delivery charges");
+INSERT INTO questions (shopper_id, product_id, question)
+VALUES (10008, 3007676, "What lenses that come in the box?");
+INSERT INTO questions (shopper_id, product_id, question)
+VALUES (10011, 3007759, "Does the laptop has an extra RAM slot?");
+INSERT INTO questions (shopper_id, product_id, question)
+VALUES (10013, 3007767, "Does the laptop support NVMe version 4 storage?");
